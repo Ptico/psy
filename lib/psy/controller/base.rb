@@ -10,11 +10,11 @@ module Psy
         instance.to_rack_array
       end
 
-      attr_reader :env
+      def env; @_env; end
 
-      attr_reader :request
+      def request; @_request; end
 
-      attr_reader :response
+      def response; @_response; end
 
       def call; end
 
@@ -25,9 +25,9 @@ module Psy
     private
 
       def initialize(request, response)
-        @env      = request.env
-        @request  = request
-        @response = response
+        @_env      = request.env
+        @_request  = request
+        @_response = response
       end
 
     end
