@@ -1,4 +1,4 @@
-class Psy
+module Psy
   module VERSION
     MAJOR = 0.freeze
     MINOR = 1.freeze
