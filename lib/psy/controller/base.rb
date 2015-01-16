@@ -10,12 +10,24 @@ module Psy
         instance.to_rack_array
       end
 
+      ##
+      # Controller environment
+      #
       def env; @_env; end
 
+      ##
+      # Request object
+      #
       def request; @_request; end
 
+      ##
+      # Response builder
+      #
       def response; @_response; end
 
+      ##
+      # Abstract: Method for main processing logic
+      # should be overrided in descendants
       def call; end
 
       def to_rack_array
@@ -24,8 +36,8 @@ module Psy
 
     private
 
-      def initialize(request, response)
-        @_env      = request.env
+      def initialize(request, response, env)
+        @_env      = env
         @_request  = request
         @_response = response
       end
