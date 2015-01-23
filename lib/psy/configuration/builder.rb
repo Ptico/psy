@@ -66,8 +66,9 @@ module Psy
 
       def set_logger(env, inst)
         logger = @parent.logger if @parent
-        logger = @envs[env].logger_instance if @envs.has_key?(env)
-        logger ||= @logger_instance || Logger.new($stdout)
+        logger = @logger_instance if @logger_instance
+        logger = @envs[env].logger_instance if @envs.has_key?(env) && @envs[env].logger_instance
+        logger ||= Logger.new($stdout)
 
         inst.instance_variable_set(:@logger, logger)
       end

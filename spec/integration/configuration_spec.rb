@@ -36,7 +36,7 @@ RSpec.describe Psy::Configuration::Builder do
           double(stubs.tap { |s| s.delete(severity) })
         end
 
-        it do
+        it 'raises error' do
           expect { subject }.to raise_error(Psy::Configuration::InvalidLoggerError, "logger must respond to ##{severity}")
         end
       end
@@ -80,17 +80,59 @@ RSpec.describe Psy::Configuration::Builder do
         context 'when defined in default env' do
           before(:each) { subject }
 
-          it { expect(result.logger).to equal(logger) }
+          it 'overwrites default logger' do
+            expect(result.logger).to equal(logger)
+          end
         end
 
         context 'when not defined in default env' do
-          it { expect(result.logger).to be_instance_of(Logger) }
+          it 'ignores another env' do
+            expect(result.logger).to be_instance_of(Logger)
+          end
         end
       end
     end
 
-    context 'when defined in child' do
+    context 'when defined in parent' do
+      let(:logger) { instance_double('Logger', stubs) }
+      let(:parent_logger) { instance_double('Logger', stubs) }
+      let(:parent) do
+        logger_instance = parent_logger
 
+        described_class.new do
+          logger(logger_instance)
+        end.build(env)
+      end
+
+      context 'when defined in children' do
+        before(:each) { subject }
+
+        it 'should be overwritten' do
+          expect(result.logger).to equal(logger)
+        end
+      end
+
+      context 'when not defined in children' do
+        it 'uses parent logger' do
+          expect(result.logger).to equal(parent_logger)
+        end
+      end
+
+      context 'when defined in children environment' do
+        before(:each) do
+          subject
+          logger_instance = env_logger
+          instance.environment :development do
+            logger(logger_instance)
+          end
+        end
+
+        let(:env_logger) { instance_double('Logger', stubs) }
+
+        it 'uses environment logger' do
+          expect(result.logger).to eql(env_logger)
+        end
+      end
     end
   end
 
