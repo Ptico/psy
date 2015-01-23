@@ -54,7 +54,22 @@ RSpec.describe Psy::Configuration::Builder do
   end
 
   describe '#params_hash' do
+    let(:env) { :development }
 
+    context 'when given' do
+      let(:hash) { Class.new(Hash) }
+
+      before(:each) do
+        instance.params_hash(hash)
+      end
+
+      it { expect(result.params_hash).to equal(hash) }
+      it { expect(result.params_hash).to_not equal(Hash) }
+    end
+
+    context 'when not given' do
+      it { expect(result.params_hash).to equal(Hash) }
+    end
   end
 
   describe '#set' do

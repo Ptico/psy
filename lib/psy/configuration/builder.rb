@@ -21,10 +21,12 @@ module Psy
 
         set(:logger, instance)
       end
+      alias :logger= :logger
 
-      def params_hash
-
+      def params_hash(params_class)
+        set(:params_hash, params_class)
       end
+      alias :params_hash= :params_hash
 
       def set(key, value)
         @props[key] = value
@@ -40,6 +42,7 @@ module Psy
         all_props = merge_props(env)
 
         all_props[:logger] = Logger.new($stdout) unless all_props.has_key?(:logger)
+        all_props[:params_hash] = Hash unless all_props.has_key?(:params_hash)
 
         all_props.keys.each do |k|
           built.send(:attr_reader, k)
