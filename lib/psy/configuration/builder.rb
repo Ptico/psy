@@ -19,7 +19,11 @@ module Psy
           raise InvalidLoggerError, absent.first
         end
 
-        @logger_instance = instance
+        set(:logger, instance)
+      end
+
+      def params_hash
+
       end
 
       def set(key, value)
@@ -35,6 +39,8 @@ module Psy
 
         all_props = merge_props(env)
 
+        all_props[:logger] = Logger.new($stdout) unless all_props.has_key?(:logger)
+
         all_props.keys.each do |k|
           built.send(:attr_reader, k)
         end
@@ -44,8 +50,6 @@ module Psy
         all_props.each_pair do |k, v|
           inst.instance_variable_set(:"@#{k}", v)
         end
-
-        set_logger(env, inst)
 
         inst.freeze
       end
@@ -62,15 +66,6 @@ module Psy
         @logger = nil
 
         instance_eval(&block) if block_given?
-      end
-
-      def set_logger(env, inst)
-        logger = @parent.logger if @parent
-        logger = @logger_instance if @logger_instance
-        logger = @envs[env].logger_instance if @envs.has_key?(env) && @envs[env].logger_instance
-        logger ||= Logger.new($stdout)
-
-        inst.instance_variable_set(:@logger, logger)
       end
 
       def merge_props(env)

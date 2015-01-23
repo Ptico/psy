@@ -2,9 +2,6 @@ require 'psy/configuration/builder'
 
 module Psy
   class Configuration
-
-    attr_reader :logger
-
     attr_reader :props
 
     def inspect
