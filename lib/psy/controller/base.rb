@@ -1,17 +1,30 @@
 module Psy
   module Controller
     class Base
-      def self.call(env)
-        request  = ::Rack::Request.new(env)
-        response = Response.new(env)
 
-        instance = new(request, response)
-        instance.call
-        instance.to_rack_array
+      class << self
+        attr_accessor :config
+
+        def configure(&block)
+          @config = Configuration::Builder.new(@config, &block).build(ENV['RACK_ENV'])
+        end
+
+        def call(env)
+          request  = ::Rack::Request.new(env)
+          response = Response.new(env)
+
+          instance = new(request, response)
+          instance.call
+          instance.to_rack_array
+        end
+
+        def inherited(subclass)
+          subclass.instance_variable_set(:"@config", self.config)
+        end
       end
 
       ##
-      # Controller environment
+      # Request environment
       #
       def env; @_env; end
 
@@ -36,8 +49,8 @@ module Psy
 
     private
 
-      def initialize(request, response, env)
-        @_env      = env
+      def initialize(request, response)
+        @_env      = request.env
         @_request  = request
         @_response = response
       end
