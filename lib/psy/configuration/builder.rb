@@ -32,6 +32,9 @@ module Psy
         @props[key] = value
       end
 
+      ##
+      # Build configuration object
+      #
       def build(env)
         env = env.to_sym
 

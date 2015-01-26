@@ -37,6 +37,25 @@ RSpec.describe Psy::Response do
     end
   end
 
+  describe '#status' do
+    context 'as getter' do
+      before(:each) do
+        response.status = 403
+      end
+
+      it { expect(response.status.code).to equal(403) }
+      it { expect(response.status.type).to equal(:client_error) }
+    end
+
+    context 'as setter' do
+      before(:each) do
+        response.status(403)
+      end
+
+      it { expect(status).to equal(403) }
+    end
+  end
+
   describe '#body=' do
     context 'single set' do
       before(:each) do
@@ -56,11 +75,21 @@ RSpec.describe Psy::Response do
     end
 
     context 'array' do
-      before(:each) do
-        response.body = ['Hello', ' world']
+      context 'when all elements is a strings' do
+        before(:each) do
+          response.body = ['Hello', ' world']
+        end
+
+        it { expect(body).to eql(['Hello', ' world']) }
       end
 
-      it { expect(body).to contain_exactly('Hello', ' world') }
+      context 'when some elements is not strings' do
+        before(:each) do
+          response.body = ['I', :have, 2, 'dogs']
+        end
+
+        it { expect(body).to eql(['I', 'have', '2', 'dogs']) }
+      end
     end
 
     context 'when body is not allowed' do
@@ -96,12 +125,72 @@ RSpec.describe Psy::Response do
     end
   end
 
+  describe '#body' do
+    context 'as getter' do
+      before(:each) do
+        response.body = 'The body'
+      end
+
+      it { expect(response.body).to contain_exactly('The body') }
+    end
+
+    context 'as setter' do
+      before(:each) do
+        response.body('Тело ответа')
+      end
+
+      it { expect(body).to contain_exactly('Тело ответа') }
+    end
+  end
+
+  describe '#body_text' do
+    before(:each) do
+      response.body = ['Hello', ' world']
+    end
+
+    it { expect(response.body_text).to eql('Hello world') }
+  end
+
   describe '#add_header' do
     before(:each) do
       response.add_header('Content-Type', 'application/json')
     end
 
     it { expect(headers).to eql('Content-Type' => 'application/json') }
+  end
+
+  describe '#headers' do
+    before(:each) do
+      before(:each) do
+        response.add_header('Content-Type', 'application/json')
+      end
+
+      it { expect(response.headers).to eql('Content-Type' => 'application/json') }
+    end
+  end
+
+  describe '#body_allowed?' do
+    subject { response.body_allowed? }
+
+    context 'when body allowed' do
+      it { expect(subject).to be(true) }
+    end
+
+    context 'when body does not allowed' do
+      context 'by request method' do
+        let(:method) { 'HEAD' }
+
+        it { expect(subject).to be(false) }
+      end
+
+      context 'by response status' do
+        before(:each) do
+          response.status = 204
+        end
+
+        it { expect(subject).to be(false) }
+      end
+    end
   end
 
 end
