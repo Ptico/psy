@@ -153,20 +153,18 @@ RSpec.describe Psy::Response do
 
   describe '#add_header' do
     before(:each) do
-      response.add_header('Content-Type', 'application/json')
+      response.add_header('X-Auth-Token', 'cbe34ae2e')
     end
 
-    it { expect(headers).to eql('Content-Type' => 'application/json') }
+    it { expect(headers).to eql('X-Auth-Token' => 'cbe34ae2e') }
   end
 
   describe '#headers' do
     before(:each) do
-      before(:each) do
-        response.add_header('Content-Type', 'application/json')
-      end
-
-      it { expect(response.headers).to eql('Content-Type' => 'application/json') }
+      response.add_header('X-Auth-Token', 'b902b2c3a')
     end
+
+    it { expect(response.headers).to eql('X-Auth-Token' => 'b902b2c3a') }
   end
 
   describe '#body_allowed?' do
@@ -191,6 +189,78 @@ RSpec.describe Psy::Response do
         it { expect(subject).to be(false) }
       end
     end
+  end
+
+  describe '#normalize!' do
+    describe 'Content-Length' do
+      context 'when Content-Type was set' do
+        before(:each) do
+          response.add_header('Content-Type', 'text/html')
+        end
+
+        context 'and body is not empty' do
+          before(:each) do
+            response.body = ['<h2>', 'Привет мир', '</h2>']
+          end
+
+          it 'should calculate content length' do
+            expect(headers['Content-Length']).to eql('28')
+          end
+        end
+
+        context 'and body is empty' do
+          it 'must be 0' do
+            expect(headers['Content-Length']).to eql('0')
+          end
+        end
+
+        context 'and body is not allowed' do
+          let(:method) { 'HEAD' }
+
+          it 'does not set Content-Type header' do
+            expect(headers).to_not have_key('Content-Length')
+          end
+        end
+      end
+
+      context 'when body does not allowed' do
+        before(:each) do
+          response.status = 204
+          response.add_header('Content-Length', '100')
+        end
+
+        it 'drops Content-Length header' do
+          expect(headers).to_not have_key('Content-Length')
+        end
+      end
+    end
+
+    describe 'Content-Type' do
+      context 'when body does not allowed' do
+        before(:each) do
+          response.status = 204
+          response.add_header('Content-Type', 'text/html')
+        end
+
+        it 'drops Content-Type header' do
+          expect(headers).to_not have_key('Content-Type')
+        end
+      end
+    end
+
+    describe 'response body' do
+      context 'when body does not allowed' do
+        before(:each) do
+          response.status = 204
+          response.body << 'foo'
+        end
+
+        it 'drops body' do
+          expect(body).to be_empty
+        end
+      end
+    end
+
   end
 
 end

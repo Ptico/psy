@@ -59,12 +59,16 @@ module Psy
       @headers[key.to_s] = value.to_s
     end
 
+    attr_reader :headers
+
     ##
     # Build rack 3-element response tuple
     #
     # Returns: {Array} with status, headers and body
     #
     def to_rack_array
+      normalize!
+
       [@status.to_i, @headers, @body]
     end
 
@@ -73,6 +77,27 @@ module Psy
     #
     def body_allowed?
       @status.allows_body? && @request_method.allows_body?
+    end
+
+    ##
+    # Normalize response
+    #
+    # This method calculates content length and sets corresponding header.
+    # Also, if body not allowed - it drops Content-Length, Content-Type headers
+    # and body.
+    #
+    def normalize!
+      if body_allowed?
+        if calculate_content_length?
+          @headers['Content-Length'] = body.inject(0) do |length, part|
+            length + ::Rack::Utils.bytesize(part)
+          end.to_s
+        end
+      else
+        @headers.delete('Content-Type')
+        @headers.delete('Content-Length')
+        @body = []
+      end
     end
 
   private
@@ -89,5 +114,15 @@ module Psy
       @headers = {}
     end
 
+    ##
+    # Private: calculate content length only if Content-Type header was set
+    #
+    # Also we don't calculate if its already set
+    #
+    # Returns: false if content-length should not be calculated
+    #
+    def calculate_content_length?
+      headers.has_key?('Content-Type') && !headers.has_key?('Content-Length')
+    end
   end
 end
