@@ -28,12 +28,13 @@ RSpec.describe Psy::Response do
       it { expect(status).to equal(404) }
     end
 
-    xcontext 'when status not registered' do
+    context 'when status not registered' do
       before(:each) do
         response.status = 777
       end
 
-      it { pending }
+      it { expect(response.status).to be_nil }
+      it { expect(response.body).to be_empty }
     end
   end
 
@@ -149,6 +150,40 @@ RSpec.describe Psy::Response do
     end
 
     it { expect(response.body_text).to eql('Hello world') }
+
+    context 'when body is not allowed' do
+      subject { response.body_text }
+      
+      context 'by request method' do
+        let(:method) { 'HEAD' }
+
+        before(:each) do
+          response.body = 'Hello'
+        end
+
+        it { expect(subject).to be_empty }
+      end
+
+      context 'by response status' do
+        context 'which was set before' do
+          before(:each) do
+            response.status = 204
+            response.body = 'Hello'
+          end
+
+          it { expect(subject).to be_empty }
+        end
+
+        context 'which has set after' do
+          before(:each) do
+            response.body = 'Hello'
+            response.status = 204
+          end
+
+          it { expect(subject).to be_empty }
+        end
+      end
+    end
   end
 
   describe '#add_header' do
