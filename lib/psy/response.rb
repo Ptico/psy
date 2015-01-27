@@ -89,13 +89,13 @@ module Psy
     def normalize!
       if body_allowed?
         if calculate_content_length?
-          @headers['Content-Length'] = body.inject(0) do |length, part|
+          @headers[Const::CONTENT_LENGTH] = body.inject(0) do |length, part|
             length + ::Rack::Utils.bytesize(part)
           end.to_s
         end
       else
-        @headers.delete('Content-Type')
-        @headers.delete('Content-Length')
+        @headers.delete(Const::CONTENT_TYPE)
+        @headers.delete(Const::CONTENT_LENGTH)
         @body = []
       end
     end
@@ -122,7 +122,7 @@ module Psy
     # Returns: false if content-length should not be calculated
     #
     def calculate_content_length?
-      headers.has_key?('Content-Type') && !headers.has_key?('Content-Length')
+      headers.has_key?(Const::CONTENT_TYPE) && !headers.has_key?(Const::CONTENT_LENGTH)
     end
   end
 end
