@@ -9,7 +9,7 @@ module Psy
     #
     def status=(response_status)
       @status = Tipi::Status[response_status.to_i]
-      @body = [] unless body_allowed?
+      @body = [] unless @status && body_allowed?
     end
 
     ##
@@ -32,7 +32,7 @@ module Psy
     # - response_body {String|Array} plain response body or array of body parts
     #
     def body=(response_body)
-      @body = Array(response_body) if body_allowed?
+      @body = Array(response_body).map(&:to_s) if body_allowed?
     end
 
     ##
@@ -46,6 +46,14 @@ module Psy
     def body(response_body=nil)
       self.body = response_body if response_body
       @body
+    end
+
+    ##
+    # Get body text
+    # Returns: text of response
+    #
+    def body_text
+      @body.join unless @body.nil?
     end
 
     ##
