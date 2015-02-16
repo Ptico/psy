@@ -53,6 +53,7 @@ module Psy
         @_env      = request.env
         @_request  = request
         @_response = response
+        @_config   = self.class.config
       end
 
     end

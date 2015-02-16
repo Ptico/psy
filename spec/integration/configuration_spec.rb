@@ -21,7 +21,7 @@ RSpec.describe Psy::Configuration::Builder do
     let(:env) { :development }
 
     let(:stubs) do
-      { log: true, debug: true, info: true, warn: true, error: true, fatal: true }
+      { log: true, debug: true, info: true, warn: true, error: true, fatal: true, unknown: true }
     end
 
     context 'when responds to #log, #debug, #info, #warn, #error, #fatal' do
@@ -30,7 +30,7 @@ RSpec.describe Psy::Configuration::Builder do
       it { expect { subject }.to_not raise_error }
     end
 
-    %i(log debug info warn error fatal).each do |severity|
+    %i(log debug info warn error fatal unknown).each do |severity|
       context "when does not responds to ##{severity}" do
         let(:logger) do
           double(stubs.tap { |s| s.delete(severity) })
@@ -73,6 +73,23 @@ RSpec.describe Psy::Configuration::Builder do
   end
 
   describe '#set' do
+    describe 'basics' do
+      let(:env) { :development }
+
+      before(:each) do
+        instance.set(key, value)
+      end
+
+      context 'when key is not string' do
+        let(:key)   { 'foo' }
+        let(:value) { 'bar' }
+
+        it 'symbolize key' do
+          expect(result[:foo]).to eql(value)
+        end
+      end
+    end
+
     context 'simple value' do
       context 'when environment not specified' do
         let(:env) { :production }
@@ -146,6 +163,6 @@ RSpec.describe Psy::Configuration::Builder do
       it { expect(subject).to eql(hello: 'world', foo: 'bar') }
     end
 
-    context 'block'
+    xcontext 'block'
   end
 end

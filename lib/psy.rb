@@ -2,6 +2,7 @@ require 'tipi'
 require 'logger'
 
 require 'psy/const'
+require 'psy/errors'
 require 'psy/configuration'
 
 module Psy

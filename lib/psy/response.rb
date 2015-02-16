@@ -49,6 +49,15 @@ module Psy
     end
 
     ##
+    # Get full body string
+    #
+    # Returns: {String}
+    #
+    def body_string
+      @body.join
+    end
+
+    ##
     # Add response header
     #
     # Params:

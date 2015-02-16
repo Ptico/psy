@@ -1,11 +1,5 @@
 module Psy
   class Configuration
-    class InvalidLoggerError < StandardError
-      def initialize(m)
-        super("logger must respond to ##{m}")
-      end
-    end
-
     class Builder
       attr_reader :props, :logger_instance
 
@@ -29,7 +23,7 @@ module Psy
       alias :params_hash= :params_hash
 
       def set(key, value)
-        @props[key] = value
+        @props[key.to_sym] = value
       end
 
       ##
@@ -62,7 +56,7 @@ module Psy
 
     private
 
-      LOGGER_METHODS = %i(log debug info warn error fatal).freeze
+      LOGGER_METHODS = %i(log debug info warn error fatal unknown).freeze
 
       def initialize(parent=nil, &block)
         @props  = {}
