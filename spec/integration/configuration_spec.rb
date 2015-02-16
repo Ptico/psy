@@ -87,6 +87,39 @@ RSpec.describe Psy::Configuration::Builder do
         it 'symbolize key' do
           expect(result[:foo]).to eql(value)
         end
+
+        it 'freezes value by default' do
+          expect(result.foo).to be_frozen
+        end
+      end
+    end
+
+    describe 'options' do
+      let(:env) { :development }
+
+      before(:each) do
+        instance.set(key, value, options)
+      end
+
+      describe ':freeze' do
+        let(:key)   { :foo }
+        let(:value) { 'bar' }
+
+        context 'when true' do
+          let(:options) { {freeze: true} }
+
+          it 'freezes value' do
+            expect(result.foo).to be_frozen
+          end
+        end
+
+        context 'when false' do
+          let(:options) { {freeze: false} }
+
+          it 'does not freeze value' do
+            expect(result.foo).to_not be_frozen
+          end
+        end
       end
     end
 

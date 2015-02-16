@@ -22,8 +22,8 @@ module Psy
       end
       alias :params_hash= :params_hash
 
-      def set(key, value)
-        @props[key.to_sym] = value
+      def set(key, value, freeze: true)
+        @props[key.to_sym] = freeze ? value.freeze : value
       end
 
       ##
